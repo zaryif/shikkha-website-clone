@@ -1,31 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
-import { 
-  getFirestore, 
-  collection, 
-  onSnapshot, 
-  addDoc, 
-  doc, 
-  setDoc, 
-  query, 
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  addDoc,
+  doc,
+  setDoc,
+  query,
   getDocs,
   writeBatch
 } from 'firebase/firestore';
-import { 
-  getAuth, 
-  signInAnonymously, 
-  signInWithCustomToken, 
-  onAuthStateChanged 
+import {
+  getAuth,
+  signInAnonymously,
+  signInWithCustomToken,
+  onAuthStateChanged
 } from 'firebase/auth';
-import { 
-  Search, 
-  Play, 
-  Plus, 
-  X, 
-  Filter, 
-  Layout, 
-  Code, 
-  TrendingUp, 
+import {
+  Search,
+  Play,
+  Plus,
+  X,
+  Filter,
+  Layout,
+  Code,
+  TrendingUp,
   CheckCircle2,
   Video,
   ExternalLink,
@@ -36,7 +36,14 @@ import {
  * FIREBASE CONFIGURATION
  * These variables are provided by the environment at runtime.
  */
-const firebaseConfig = JSON.parse(__firebase_config);
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+  apiKey: "mock-key",
+  authDomain: "mock.firebaseapp.com",
+  projectId: "mock-project",
+  storageBucket: "mock.appspot.com",
+  messagingSenderId: "123456789",
+  appId: "1:123456789:web:abcdef"
+};
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
@@ -108,7 +115,7 @@ export default function App() {
     // Sync from Firestore
     const unsubscribe = onSnapshot(videosRef, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      
+
       // If database is empty, seed with initial data
       if (data.length === 0 && loading) {
         seedInitialData();
@@ -162,8 +169,8 @@ export default function App() {
    */
   const filteredVideos = useMemo(() => {
     return videos.filter(v => {
-      const matchesSearch = v.t.toLowerCase().includes(search.toLowerCase()) || 
-                            v.n.toString().includes(search);
+      const matchesSearch = v.t.toLowerCase().includes(search.toLowerCase()) ||
+        v.n.toString().includes(search);
       const matchesTrack = activeTrack === "All" || v.track === activeTrack;
       return matchesSearch && matchesTrack;
     });
@@ -202,8 +209,8 @@ export default function App() {
 
           <div className="flex-1 max-w-md relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="Search by title or class number..."
               className="w-full pl-10 pr-4 py-2 bg-slate-100 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all text-sm"
               value={search}
@@ -211,7 +218,7 @@ export default function App() {
             />
           </div>
 
-          <button 
+          <button
             onClick={() => setIsAddModalOpen(true)}
             className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl hover:bg-slate-800 transition-all shadow-md active:scale-95"
           >
@@ -223,24 +230,23 @@ export default function App() {
 
       {/* --- MAIN CONTENT --- */}
       <main className="max-w-7xl mx-auto px-4 py-8">
-        
+
         {/* Statistics & Filters */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
           <div>
             <h2 className="text-2xl font-bold mb-1">লার্নিং ড্যাশবোর্ড</h2>
             <p className="text-slate-500 text-sm">আপনার জন্য মোট {stats.total} টি ক্লাস বরাদ্দ করা আছে</p>
           </div>
-          
+
           <div className="flex flex-wrap gap-2 p-1 bg-slate-200 rounded-2xl w-fit">
             {['All', 'Fundamental', 'Engineering', 'Marketing'].map((track) => (
               <button
                 key={track}
                 onClick={() => setActiveTrack(track)}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  activeTrack === track 
-                  ? 'bg-white text-blue-600 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
-                }`}
+                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${activeTrack === track
+                    ? 'bg-white text-blue-600 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
+                  }`}
               >
                 {track === 'All' ? 'সব ক্লাস' : track}
               </button>
@@ -251,14 +257,14 @@ export default function App() {
         {/* Video Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredVideos.map((video) => (
-            <div 
+            <div
               key={video.id + video.n}
               className="group bg-white rounded-3xl overflow-hidden border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer flex flex-col"
               onClick={() => setSelectedVideo(video)}
             >
               <div className="relative aspect-video bg-slate-100 overflow-hidden">
-                <img 
-                  src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`} 
+                <img
+                  src={`https://img.youtube.com/vi/${video.id}/mqdefault.jpg`}
                   alt={video.t}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -271,17 +277,16 @@ export default function App() {
                   Class {video.n}
                 </div>
               </div>
-              
+
               <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center gap-1.5 mb-2">
                     {video.track === 'Fundamental' && <Layout className="w-3 h-3 text-orange-500" />}
                     {video.track === 'Engineering' && <Code className="w-3 h-3 text-blue-500" />}
                     {video.track === 'Marketing' && <TrendingUp className="w-3 h-3 text-emerald-500" />}
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${
-                      video.track === 'Fundamental' ? 'text-orange-500' : 
-                      video.track === 'Engineering' ? 'text-blue-500' : 'text-emerald-500'
-                    }`}>
+                    <span className={`text-[10px] font-black uppercase tracking-widest ${video.track === 'Fundamental' ? 'text-orange-500' :
+                        video.track === 'Engineering' ? 'text-blue-500' : 'text-emerald-500'
+                      }`}>
                       {video.track}
                     </span>
                   </div>
@@ -290,11 +295,11 @@ export default function App() {
                   </h3>
                 </div>
                 <div className="mt-4 pt-4 border-t border-slate-50 flex items-center justify-between text-slate-400">
-                   <div className="flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" />
-                      <span className="text-[10px] font-medium uppercase tracking-wider">Ready to watch</span>
-                   </div>
-                   <ExternalLink className="w-3 h-3 group-hover:text-blue-500 transition-colors" />
+                  <div className="flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-slate-300" />
+                    <span className="text-[10px] font-medium uppercase tracking-wider">Ready to watch</span>
+                  </div>
+                  <ExternalLink className="w-3 h-3 group-hover:text-blue-500 transition-colors" />
                 </div>
               </div>
             </div>
@@ -317,7 +322,7 @@ export default function App() {
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsAddModalOpen(false)} />
-          <form 
+          <form
             onSubmit={handleAddVideo}
             className="relative w-full max-w-lg bg-white rounded-[32px] p-8 shadow-2xl overflow-hidden"
           >
@@ -326,8 +331,8 @@ export default function App() {
                 <Plus className="w-5 h-5 text-blue-600" />
                 নতুন ক্লাস যোগ করুন
               </h2>
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setIsAddModalOpen(false)}
                 className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-all"
               >
@@ -338,22 +343,22 @@ export default function App() {
             <div className="space-y-4">
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">YouTube URL</label>
-                <input 
+                <input
                   required
-                  type="url" 
+                  type="url"
                   placeholder="https://youtu.be/..."
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all outline-none"
                   value={newVideoUrl}
                   onChange={(e) => setNewVideoUrl(e.target.value)}
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Class Number</label>
-                  <input 
+                  <input
                     required
-                    type="number" 
+                    type="number"
                     placeholder="e.g. 305"
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all outline-none"
                     value={newVideoNumber}
@@ -362,7 +367,7 @@ export default function App() {
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Track</label>
-                  <select 
+                  <select
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all outline-none"
                     value={newVideoTrack}
                     onChange={(e) => setNewVideoTrack(e.target.value)}
@@ -376,9 +381,9 @@ export default function App() {
 
               <div>
                 <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Lesson Title</label>
-                <input 
+                <input
                   required
-                  type="text" 
+                  type="text"
                   placeholder="Enter lesson title..."
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-all outline-none"
                   value={newVideoTitle}
@@ -387,7 +392,7 @@ export default function App() {
               </div>
             </div>
 
-            <button 
+            <button
               type="submit"
               className="w-full mt-8 bg-blue-600 text-white py-4 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-xl shadow-blue-200 active:scale-95"
             >
@@ -402,16 +407,16 @@ export default function App() {
         <div className="fixed inset-0 z-[60] flex items-center justify-center p-0 sm:p-4">
           <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-md" onClick={() => setSelectedVideo(null)} />
           <div className="relative w-full max-w-5xl bg-black aspect-video sm:rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-            <button 
+            <button
               onClick={() => setSelectedVideo(null)}
               className="absolute top-4 right-4 z-20 w-10 h-10 bg-white/10 hover:bg-red-500 rounded-full text-white flex items-center justify-center transition-all backdrop-blur-md"
             >
               <X className="w-5 h-5" />
             </button>
-            <iframe 
+            <iframe
               src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0`}
               className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             />
           </div>
